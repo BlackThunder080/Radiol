@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <style>
+            body {
+                background-color: #141414;
+                font-family: sans-serif;
+                font-size: 3vh;
+            }
+
+            table {
+                color: white;
+                text-align: center;
+            }
+
+            input[type="text"] {
+                display: block;
+                margin-right: auto;
+                margin-left: auto;
+                height: 4vh;
+                width: 90vw;
+                font-size: 3vh;
+                text-align: center;
+            }
+            
+            .centre {
+                width: 90vw;
+                margin-right: auto;
+                margin-left: auto;
+            }
+
+            .green {
+                background-color: green;
+            }
+
+            .yellow {
+                background-color: #ccab17;
+            }
+
+            .higher::after {
+                content: " \2191";
+            }
+
+            .lower::after {
+                content: " \2193";
+            }
+
+            #win {
+                display: none;
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background-color: rgb(44, 44, 44);
+                color: white;
+                text-align: center;
+                width: 50vw;
+            }
+
+            #search {
+                background-color: white;
+                text-align: center;
+            }
+
+            #search:hover {
+                background-color: #e4e4e4;
+            }
+        </style>
+    </head>
+    <body>
+        <input type="text" id="input" onkeyup="keydown()">
+        <div class="centre" id="search"></div>
+        <table id="guesses" class="centre">
+            <tr>
+                <td>Title</td>
+                <td>Track No.</td>
+                <td>Album</td>
+                <td>Length</td>
+            </tr>
+        </table>
+
+        <div id="win">
+            <h1>Correct</h1>
+            <img id="cover">
+            <h2 id="correct"></h2>
+            <button onclick="location.reload();">Play Again</button>
+        </div>
+
+        <script defer>
+            const albums = [
+                'Pablo Honey',
+                'The Bends',
+                'Ok Computer',
+                'Kid A',
+                'Amnesiac',
+                'Hail to the Thief',
+                'In Rainbows',
+                'The King of Limbs',
+                'A Moon Shaped Pool',
+            ];
+
+            const covers = [
+                "https://upload.wikimedia.org/wikipedia/en/0/0f/Radiohead.pablohoney.albumart.jpg",
+                "https://upload.wikimedia.org/wikipedia/en/5/55/Radioheadthebends.png",
+                "https://upload.wikimedia.org/wikipedia/en/b/ba/Radioheadokcomputer.png",
+                "https://upload.wikimedia.org/wikipedia/en/0/02/Radioheadkida.png",
+                "https://upload.wikimedia.org/wikipedia/en/8/8c/Radiohead_-_Amnesiac_cover.png",
+                "https://upload.wikimedia.org/wikipedia/en/6/61/Radioheadhailtothethief.png",
+                "https://upload.wikimedia.org/wikipedia/en/1/14/Inrainbowscover.png",
+                "https://upload.wikimedia.org/wikipedia/en/a/a2/Radioheadthekingoflimbs.png",
+                "https://upload.wikimedia.org/wikipedia/en/6/6a/Amoonshapedpool.png",
+            ];
+
+
+            const songs = [
+                { no: 1,  title: "You",                    album: 0, length: 209 },
+                { no: 2,  title: "Creep",                  album: 0, length: 236 },
+                { no: 3,  title: "How Do You?",            album: 0, length: 132 },
+                { no: 4,  title: "Stop Whispering",        album: 0, length: 326 },
+                { no: 5,  title: "Thinking About You",     album: 0, length: 161 },
+                { no: 6,  title: "Anyone Can Play Guitar", album: 0, length: 218 },
+                { no: 7,  title: "Ripcord",                album: 0, length: 190 },
+                { no: 8,  title: "Vegetable",              album: 0, length: 193 },
+                { no: 9,  title: "Prove Yourself",         album: 0, length: 145 },
+                { no: 10, title: "I Can't",                album: 0, length: 253 },
+                { no: 11, title: "Lurgee",                 album: 0, length: 188 },
+                { no: 12, title: "Blow Out",               album: 0, length: 280 },
+
+                { no: 1,  title: "Planet Telex",                 album: 1, length: 259 },
+                { no: 2,  title: "The Bends",                    album: 1, length: 246 },
+                { no: 3,  title: "High and Dry",                 album: 1, length: 257 },
+                { no: 4,  title: "Fake Plastic Trees",           album: 1, length: 290 },
+                { no: 5,  title: "Bones",                        album: 1, length: 189 },
+                { no: 6,  title: "(Nice Dream)"	,                album: 1, length: 233 },
+                { no: 7,  title: "Just",                         album: 1, length: 234 },
+                { no: 8,  title: "My Iron Lung",                 album: 1, length: 276 },
+                { no: 9,  title: "Bullet Proof... I Wish I Was", album: 1, length: 208 },
+                { no: 10, title: "Black Star",                   album: 1, length: 247 },
+                { no: 11, title: "Sulk",                         album: 1, length: 222 },
+                { no: 12, title: "Street Spirit (Fade Out)",     album: 1, length: 252 },
+
+                { no: 1,  title: "Airbag",                      album: 2, length: 284 },
+                { no: 2,  title: "Paranoid Android",            album: 2, length: 383 },
+                { no: 3,  title: "Subterranean Homesick Alien", album: 2, length: 267 },
+                { no: 4,  title: "Exit Music (For A Film)",     album: 2, length: 264 },
+                { no: 5,  title: "Let Down",                    album: 2, length: 299 },
+                { no: 6,  title: "Karma Police",                album: 2, length: 261 },
+                { no: 7,  title: "Fitter Happier",              album: 2, length: 117 },
+                { no: 8,  title: "Electioneering",              album: 2, length: 230 },
+                { no: 9,  title: "Climbing Up The Walls",       album: 2, length: 285 },
+                { no: 10, title: "No Suprises",                 album: 2, length: 228 },
+                { no: 11, title: "Lucky",                       album: 2, length: 259 },
+                { no: 12, title: "The Tourist",                 album: 2, length: 230 },
+
+                { no: 1,  title: "Everything in It's Right Place", album: 3, length: 251 },
+                { no: 2,  title: "Kid A",                          album: 3, length: 284 },
+                { no: 3,  title: "The National Anthem",            album: 3, length: 351 },
+                { no: 4,  title: "How to Disappear Completely",    album: 3, length: 356 },
+                { no: 5,  title: "Treefingers",                    album: 3, length: 222 },
+                { no: 6,  title: "Optimistic",                     album: 3, length: 315 },
+                { no: 7,  title: "In Limbo",                       album: 3, length: 211 },
+                { no: 8,  title: "Idioteque",                      album: 3, length: 309 },
+                { no: 9,  title: "Morning Bell",                   album: 3, length: 275 },
+                { no: 10, title: "Motion Picture Soundtrack",      album: 3, length: 200 },
+                { no: 11, title: "Untitled",                       album: 3, length:  52 },
+
+                { no: 1,  title: "Packt Like Sardines in a Crushd Tin Box",  album: 4, length: 240 },
+                { no: 2,  title: "Pyramid Song",                             album: 4, length: 289 },
+                { no: 3,  title: "Pulk/Pull Revolving Doors",                album: 4, length: 247 },
+                { no: 4,  title: "You and Whose Army",                       album: 4, length: 191 },
+                { no: 5,  title: "I Might Be Wrong",                         album: 4, length: 294 },
+                { no: 6,  title: "Knives Out",                               album: 4, length: 255 },
+                { no: 7,  title: "Morning Bell/Amnesiac",                    album: 4, length: 194 },
+                { no: 8,  title: "Dollars and Cents",                        album: 4, length: 292 },
+                { no: 9,  title: "Hunting Bears",                            album: 4, length: 121 },
+                { no: 10, title: "Like Spinning Plates",                     album: 4, length: 237 },
+                { no: 11, title: "Life in a Glasshouse",                     album: 4, length: 271 },
+                
+                { no: 1,  title: "2 + 2 = 5",                  album: 5, length: 240 },
+                { no: 2,  title: "Sit Down. Stand Up",         album: 5, length: 289 },
+                { no: 3,  title: "Sail to the Moon",           album: 5, length: 247 },
+                { no: 4,  title: "Backdrifts",                 album: 5, length: 191 },
+                { no: 5,  title: "Go to Sleep",                album: 5, length: 294 },
+                { no: 6,  title: "Where I End and You Begin",  album: 5, length: 255 },
+                { no: 7,  title: "We Suck Young Blood",        album: 5, length: 194 },
+                { no: 8,  title: "The Gloaming",               album: 5, length: 292 },
+                { no: 9,  title: "There There",                album: 5, length: 121 },
+                { no: 10, title: "I Will",                     album: 5, length: 237 },
+                { no: 11, title: "A Punchup at a Wedding",     album: 5, length: 271 },
+                { no: 12, title: "Myxomatosis",                album: 5, length: 271 },
+                { no: 13, title: "Scatterbrain",               album: 5, length: 271 },
+                { no: 14, title: "A Wolf at the Door",         album: 5, length: 271 },
+
+                { no: 1,  title: "15 Step",                    album: 6, length: 240 },
+                { no: 2,  title: "Bodysnatchers",              album: 6, length: 289 },
+                { no: 3,  title: "Nude",                       album: 6, length: 247 },
+                { no: 4,  title: "Weird Fishes / Arpeggi",     album: 6, length: 191 },
+                { no: 5,  title: "All I Need",                 album: 6, length: 294 },
+                { no: 6,  title: "Faust Arp",                  album: 6, length: 255 },
+                { no: 7,  title: "Reckoner",                   album: 6, length: 194 },
+                { no: 8,  title: "Jigsaw Falling Into Place",  album: 6, length: 194 },
+                { no: 9,  title: "House of Cards",             album: 6, length: 292 },
+                { no: 10, title: "Videotape",                  album: 6, length: 121 },
+
+                { no: 1, title: "Bloom",             album: 7, length: 240 },
+                { no: 2, title: "Morning Mr Magpie", album: 7, length: 289 },
+                { no: 3, title: "Little by Little",  album: 7, length: 247 },
+                { no: 4, title: "Feral",             album: 7, length: 191 },
+                { no: 5, title: "Lotus Flower",      album: 7, length: 294 },
+                { no: 6, title: "Codex",             album: 7, length: 255 },
+                { no: 7, title: "Give Up The Ghost", album: 7, length: 194 },
+                { no: 8, title: "Separator",         album: 7, length: 194 },
+
+                { no: 1,  title: "Burn The Witch",                album: 8, length: 240 },
+                { no: 2,  title: "Daydreaming",                   album: 8, length: 289 },
+                { no: 3,  title: "Decks Dark",                    album: 8, length: 247 },
+                { no: 4,  title: "Desert Island Disk",            album: 8, length: 247 },
+                { no: 5,  title: "Ful Stop",                      album: 8, length: 191 },
+                { no: 6,  title: "Glass Eyes",                    album: 8, length: 294 },
+                { no: 7,  title: "Identikit",                     album: 8, length: 255 },
+                { no: 8,  title: "The Numbers",                   album: 8, length: 194 },
+                { no: 9,  title: "Present Tense",                 album: 8, length: 194 },
+                { no: 10, title: "Tinker Tailor Soldier Sailor",  album: 8, length: 194 },
+                { no: 11, title: "True Love Waits",               album: 8, length: 194 },
+            ];
+            
+            const correct = songs[Math.floor(Math.random() * songs.length)];
+            console.log(correct);
+
+            function keydown() {
+                document.getElementById('search').innerHTML = "";
+
+                let title = document.getElementById('input').value.toLowerCase();
+                
+                if (title === "")
+                    return;
+
+                let count = 0;
+                for (i in songs) {
+                    if (count >= 5)
+                        return;
+                    
+                    if (songs[i].title.toLowerCase().includes(title)) {
+                        createAutoComplete(songs[i]);
+                        count++;
+                    }
+                }
+            }
+
+            function createAutoComplete(song) {
+                let div = document.createElement('div');
+                div.innerHTML = song.title;
+                div.onclick = function() { guessSong(song); };
+                
+                let input = document.createElement('input');
+                input.value = song.title;
+                input.type = 'hidden';
+
+                div.appendChild(input);
+                document.getElementById("search").appendChild(div);
+            }
+
+            function guessSong(song) {
+                let table  = document.getElementById('guesses');
+                let row    = table.insertRow(1);
+                
+                let title  = row.insertCell(0); 
+                let no     = row.insertCell(1); 
+                let album  = row.insertCell(2); 
+                let length = row.insertCell(3);
+                
+                title.innerHTML  = song.title;
+                no.innerHTML     = song.no;
+                album.innerHTML  = albums[song.album];
+                length.innerHTML = sec2min(song.length);
+                
+                if (song.no === correct.no) no.classList.add('green');
+                else if (Math.abs(song.no - correct.no) <= 2) no.classList.add('yellow');
+                if (song.no > correct.no) no.classList.add('lower');
+                else if (song.no < correct.no) no.classList.add('higher');
+                
+                if (song.album === correct.album) album.classList.add('green');
+                else if (Math.abs(song.album - correct.album) <= 2) album.classList.add('yellow');
+                if (song.album > correct.album) album.classList.add('lower');
+                else if (song.album < correct.album) album.classList.add('higher');
+                
+                if (song.length === correct.length) length.classList.add('green');
+                else if (Math.abs(song.length - correct.length) <= 30) length.classList.add('yellow');
+                if (song.length > correct.length) length.classList.add('lower');
+                else if (song.length < correct.length) length.classList.add('higher');
+                
+                if (song.title === correct.title) {
+                    title.classList.add('green')
+                    document.getElementById('win').style.display = 'block';
+                    document.getElementById('cover').src = covers[correct.album];
+                    document.getElementById('correct').innerHTML = correct.title;
+                }
+            }
+            
+            function sec2min(secs) {
+                return Math.floor(secs / 60).toString() + ':' + (secs % 60).toLocaleString('en-US', { minimumIntegerDigits: 2 });
+            }
+        </script>
+    </body>
+</html>
